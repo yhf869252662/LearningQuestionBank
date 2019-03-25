@@ -1,2 +1,3 @@
-﻿  ThreadCache.cpp
-  MemoryPool.vcxproj -> E:\Xiangmu\MemoryPool\Debug\MemoryPool.exe
+﻿  PageCache.cpp
+e:\learningquestionbank\memorypool\memorypool\pagecache.cpp(38): warning C4018: “<”: 有符号/无符号不匹配
+  MemoryPool.vcxproj -> E:\LearningQuestionBank\MemoryPool\Debug\MemoryPool.exe

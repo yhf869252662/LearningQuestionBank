@@ -14,12 +14,12 @@ Span* CentralCache::GetOneSpan(SpanList& spanlist, size_t byte_size)
 			span = span->_next;
 	}
 
-	//参数应该经过计算
-	Span *newspan = PageCache::GetInstance()->NewSpan(3);
-	newspan->_objsize = byte_size;
+	size_t npages = SizeClass::NumMovePage(byte_size);
+	Span *newspan = PageCache::GetInstance()->NewSpan(npages);
 	char *cur = (char*)((newspan->_pageid) << PAGE_SHIFT);
-	char *end = cur + newspan->_npage;
+	char *end = cur + (newspan->_npage << PAGE_SHIFT);
 	newspan->_list = cur;
+	newspan->_objsize = byte_size;
 	while (cur + byte_size < end)
 	{
 		char *next = cur + byte_size;
@@ -35,10 +35,9 @@ Span* CentralCache::GetOneSpan(SpanList& spanlist, size_t byte_size)
 
 size_t CentralCache::FetchRangeObj(void *& start, void *& end, size_t n, size_t byte_size)
 {
-	//加锁
-
 	size_t index = SizeClass::Index(byte_size);
 	SpanList &spanlist = _spanlist[index];
+	spanlist.Lock();
 	Span *span = GetOneSpan(spanlist, byte_size);
 
 	size_t batchsize = 0;
@@ -64,11 +63,30 @@ size_t CentralCache::FetchRangeObj(void *& start, void *& end, size_t n, size_t 
 		spanlist.Erase(span);
 		spanlist.PushBack(span);
 	}
+	spanlist.Unlock();
 
 	return batchsize;
 }
 
+//还PageCache一个span
 void CentralCache::ReleaseListToSpans(void* start, size_t size)
 {
+	size_t index = SizeClass::Index(size);
+	SpanList& spanlist = _spanlist[index];
+	spanlist.Lock();
+	while (start)
+	{
+		void *next = NextObj(start);
+		Span *span = PageCache::GetInstance()->MapObjectToSpan(start);
+		NextObj(start) = span->_list;
+		span->_list = start;
+		if (--span->_usecount == 0)
+		{
+			PageCache::GetInstance()->ReleaseSpanToPageCahce(span);
+			spanlist.Erase(span);
+		}
 
+		start = next;
+	}
+	spanlist.Unlock();
 }

@@ -12,6 +12,7 @@ using std::endl;
 #include <assert.h>
 #include <Windows.h>
 #include <algorithm>
+#include <mutex>
 using std::map;
 using std::vector;
 
@@ -37,7 +38,7 @@ public:
 	}
 	void PushRange(void *start, void *end, size_t n)
 	{
-		*(void**)end = _list;
+		NextObj(end) = _list;
 		_list = start;
 		_size += n;
 	}
@@ -133,9 +134,9 @@ public:
 
 		//size越大,num越小
 		int num = (int)(MAX_SIZE / size);
-		if (num <= 2)
+		if (num < 2)
 			size = 2;
-		if (num >= 512)
+		if (num > 512)
 			size = 512;
 		return num;
 	}
@@ -242,9 +243,18 @@ public:
 		cur->_prev->_next = cur->_next;
 		cur->_next->_prev = cur->_prev;
 	}
+	void Lock()
+	{
+		mtx.lock();
+	}
+	void Unlock()
+	{
+		mtx.unlock();
+	}
 	SpanList(const SpanList&) = delete;
 	SpanList& operator=(const SpanList&) = delete;
 
 private:
 	Span * _head;
+	std::mutex mtx;
 };

@@ -44,5 +44,8 @@
     <ClCompile Include="UnitTest.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="benchmark.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>
