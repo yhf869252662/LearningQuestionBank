@@ -1,3 +1,4 @@
-﻿  PageCache.cpp
-e:\learningquestionbank\memorypool\memorypool\pagecache.cpp(38): warning C4018: “<”: 有符号/无符号不匹配
+﻿  CentralCache.cpp
+  benchmark.cpp
+  正在生成代码...
   MemoryPool.vcxproj -> E:\LearningQuestionBank\MemoryPool\Debug\MemoryPool.exe
