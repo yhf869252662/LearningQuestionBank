@@ -73,9 +73,9 @@ void CentralCache::ReleaseListToSpans(void* start, size_t size)
 {
 	size_t index = SizeClass::Index(size);
 	SpanList& spanlist = _spanlist[index];
-	spanlist.Lock();
 	while (start)
 	{
+		spanlist.Lock();
 		void *next = NextObj(start);
 		Span *span = PageCache::GetInstance()->MapObjectToSpan(start);
 		NextObj(start) = span->_list;
@@ -87,6 +87,6 @@ void CentralCache::ReleaseListToSpans(void* start, size_t size)
 		}
 
 		start = next;
+		spanlist.Unlock();
 	}
-	spanlist.Unlock();
 }
